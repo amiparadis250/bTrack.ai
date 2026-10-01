@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
     cors_origins: str = "http://localhost:3000"
-    ai_api_key: str | None = None
+    gemini_api_key: str | None = None
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -1,10 +1,32 @@
 import os
 import uuid
+from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
-os.environ.setdefault(
-    "DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/btrack_test"
-)
+
+
+def _read_env_database_url() -> str | None:
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if not env_path.exists():
+        return None
+    for line in env_path.read_text().splitlines():
+        if line.startswith("DATABASE_URL="):
+            return line.split("=", 1)[1].strip()
+    return None
+
+
+def _derive_test_database_url() -> str:
+    base_url = (
+        os.environ.get("DATABASE_URL")
+        or _read_env_database_url()
+        or "postgresql+psycopg://postgres:postgres@localhost:5432/btrack"
+    )
+    parts = urlsplit(base_url)
+    return urlunsplit((parts.scheme, parts.netloc, f"{parts.path}_test", parts.query, parts.fragment))
+
+
+os.environ["DATABASE_URL"] = _derive_test_database_url()
 
 import pytest
 from fastapi.testclient import TestClient
@@ -19,13 +41,13 @@ settings = get_settings()
 
 
 def _admin_url(db_url: str) -> str:
-    base, _, _ = db_url.rpartition("/")
-    return f"{base}/postgres"
+    parts = urlsplit(db_url)
+    return urlunsplit((parts.scheme, parts.netloc, "/postgres", parts.query, parts.fragment))
 
 
 @pytest.fixture(scope="session", autouse=True)
 def _ensure_test_database():
-    target_db = settings.database_url.rsplit("/", 1)[-1]
+    target_db = urlsplit(settings.database_url).path.lstrip("/")
     admin_engine = create_engine(_admin_url(settings.database_url), isolation_level="AUTOCOMMIT")
     with admin_engine.connect() as conn:
         exists = conn.execute(text("SELECT 1 FROM pg_database WHERE datname = :name"), {"name": target_db}).first()

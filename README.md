@@ -4,11 +4,11 @@
 
 bTrack.ai is an AI-ready financial management platform for small and medium
 businesses in Rwanda. This repo contains the Next.js frontend and the FastAPI
-backend for the first slice of the product: authentication, business
-onboarding, transaction tracking, and a dashboard with real financial KPIs.
-Import, deep analytics, reports, and the AI Assistant/Insights are stubbed in
-the navigation with honest "coming soon" states -- they're not built yet, and
-nothing on screen is faked in the meantime.
+backend for: authentication, business onboarding, transaction tracking, a
+dashboard with real financial KPIs, analytics, a Gemini-backed AI Assistant,
+proactive AI Insights, and PDF/Excel report generation. Historical data import
+is the one piece still stubbed in the navigation with an honest "coming soon"
+state -- it's not built yet, and nothing on screen is faked in the meantime.
 
 ## Architecture
 
@@ -106,8 +106,13 @@ JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=15
 REFRESH_TOKEN_EXPIRE_DAYS=7
 CORS_ORIGINS=http://localhost:3000
-AI_API_KEY=
+GEMINI_API_KEY=
 ```
+
+`GEMINI_API_KEY` powers the AI Assistant (`/ai/chat`). Without it, that one
+endpoint returns a clean 503 ("AI Assistant isn't configured yet") -- every
+other feature works with no AI key at all, per the spec's AI-failure-handling
+requirement.
 
 Never commit real secrets -- `backend/.env` and the root `.env` are gitignored.
 
@@ -143,6 +148,14 @@ DELETE /businesses/{id}/transactions/{transaction_id}
 GET    /businesses/{id}/analytics/overview
 GET    /businesses/{id}/analytics/trend
 GET    /businesses/{id}/analytics/expense-breakdown
+
+POST   /businesses/{id}/ai/chat
+
+GET    /businesses/{id}/insights
+
+GET    /businesses/{id}/reports
+POST   /businesses/{id}/reports
+GET    /businesses/{id}/reports/{report_id}/download
 ```
 
 Every business-scoped route verifies the authenticated user owns that
@@ -156,5 +169,20 @@ from another account.
   drift; the frontend only formats them for display.
 - JWT access/refresh tokens are kept in httpOnly cookies set by Next.js route
   handlers (`frontend/app/api/auth/*`) -- the browser never sees the raw tokens.
-- AI features (Assistant, categorization, insights) are intentionally not
-  wired up yet; see the roadmap in the product spec for the phased plan.
+- The AI Assistant uses Gemini function calling (`backend/app/services/ai_service.py`):
+  Gemini never computes a financial figure itself -- it only calls real backend
+  functions (`get_revenue`, `get_expenses`, `get_profit`, etc.) that query the
+  database, then explains the real result. Model is pinned to `gemini-3.1-flash-lite`;
+  if a different Gemini model name 404s or 503s for your key, check
+  `client.models.list()` for currently available names and update `MODEL_NAME`.
+- AI Insights (`insights_service.py`) are deterministic, not LLM-generated --
+  period-over-period deltas (revenue, expense categories, concentration, margin)
+  computed in SQL and phrased with templates. This keeps them instant, free, and
+  impossible to hallucinate; regenerating is idempotent (upserts by business +
+  type + period) so revisiting the page doesn't create duplicates.
+- Reports (`report_service.py`) store only metadata (type/format/period) in the
+  `reports` table; the PDF (reportlab) or Excel (openpyxl) file itself is
+  regenerated fresh from current data on every download rather than stored as a
+  blob in Postgres.
+- Transaction categorization and historical-data import are the remaining
+  unbuilt pieces; see the roadmap in the product spec for the phased plan.

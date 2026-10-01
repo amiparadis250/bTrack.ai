@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, UploadCloud } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TransactionFilters } from "@/components/transactions/transaction-filters";
@@ -43,13 +43,18 @@ export async function TransactionsPage({
     <div className="flex flex-col gap-section-gap">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-headline-sm text-text-dark">{title}</p>
-        <Link
-          href={`/dashboard/transactions/new?type=${type ?? "expense"}`}
-          className={buttonVariants()}
-        >
-          <Plus className="size-4" />
-          Add Transaction
-        </Link>
+        <div className="flex items-center gap-2">
+          {type === undefined ? (
+            <Link href="/dashboard/imports" className={buttonVariants({ variant: "outline" })}>
+              <UploadCloud className="size-4" />
+              Import
+            </Link>
+          ) : null}
+          <Link href={`/dashboard/transactions/new?type=${type ?? "expense"}`} className={buttonVariants()}>
+            <Plus className="size-4" />
+            Add Transaction
+          </Link>
+        </div>
       </div>
 
       <Card>

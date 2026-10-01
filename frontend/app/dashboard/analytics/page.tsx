@@ -76,7 +76,13 @@ export default async function AnalyticsPage({
             <CardTitle>Revenue vs Expenses (last 6 months)</CardTitle>
           </CardHeader>
           <CardContent>
-            <RevenueExpenseChart data={trend} currency={business.currency} />
+            {trend.length > 0 ? (
+              <RevenueExpenseChart data={trend} currency={business.currency} />
+            ) : (
+              <p className="py-10 text-center text-body-sm text-text-muted">
+                No transactions recorded yet -- add one to see your trend here.
+              </p>
+            )}
           </CardContent>
         </Card>
 

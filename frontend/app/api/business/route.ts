@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { ACCESS_TOKEN_MAX_AGE, ACTIVE_BUSINESS_COOKIE } from "@/lib/auth-cookies";
+import { ACTIVE_BUSINESS_COOKIE, ACTIVE_BUSINESS_MAX_AGE } from "@/lib/auth-cookies";
 import { authedBackendFetch, parseBackendError } from "@/lib/backend";
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    maxAge: ACCESS_TOKEN_MAX_AGE * 4 * 24 * 30,
+    maxAge: ACTIVE_BUSINESS_MAX_AGE,
   });
 
   return NextResponse.json({ success: true, data: business });

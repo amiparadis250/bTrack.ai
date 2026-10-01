@@ -104,6 +104,43 @@ export function TransactionTable({
     }),
   ];
 
+  function renderCard(row: Transaction) {
+    const isOutflow = row.type === "expense";
+    const categoryName = row.category_id ? categoryNames[row.category_id] : undefined;
+
+    return (
+      <div className="flex flex-col gap-2 rounded-lg border border-border p-3.5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-col gap-0.5">
+            <p className="text-body-sm font-semibold text-text-dark">{row.description}</p>
+            <p className="text-caption text-text-muted">{formatDate(row.transaction_date)}</p>
+          </div>
+          <span className={cn("shrink-0 text-body-sm font-semibold", isOutflow ? "text-destructive" : "text-success")}>
+            {isOutflow ? "-" : "+"}
+            {formatMoney(row.amount, currency)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant={isOutflow ? "destructive" : "secondary"}>{TRANSACTION_TYPE_LABELS[row.type]}</Badge>
+            <span className="text-caption text-text-muted">{categoryName ?? "Uncategorized"}</span>
+            <span className="text-caption text-text-muted">&middot; {PAYMENT_METHOD_LABELS[row.payment_method]}</span>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={deletingId === row.id}
+            onClick={() => handleDelete(row.id)}
+            aria-label="Delete transaction"
+          >
+            <Trash2 className="size-4 text-destructive" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DataTable
       data={transactions}
@@ -112,6 +149,7 @@ export function TransactionTable({
       noun="transactions"
       sortable
       emptyMessage="No transactions match your filters."
+      renderCard={renderCard}
     />
   );
 }

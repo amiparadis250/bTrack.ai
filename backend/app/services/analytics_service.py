@@ -10,6 +10,14 @@ from app.models.transaction import Transaction
 from app.schemas.analytics import AnalyticsOverview, CategoryBreakdownItem, TrendPoint
 
 ZERO = Decimal("0.00")
+CENTS = Decimal("0.01")
+
+
+def _money(value) -> Decimal:
+    # Postgres/psycopg can return a bare integer 0 (scale 0) instead of a scale-2
+    # numeric when COALESCE falls back to its literal default over an empty sum --
+    # quantize so API responses always show a stable "0.00", never "0".
+    return Decimal(value).quantize(CENTS)
 
 
 def get_overview(db: Session, business_id: uuid.UUID, start: date, end: date) -> AnalyticsOverview:
@@ -25,8 +33,8 @@ def get_overview(db: Session, business_id: uuid.UUID, start: date, end: date) ->
         Transaction.transaction_date <= end,
     )
     revenue, expenses, transaction_count = db.execute(stmt).one()
-    revenue = Decimal(revenue)
-    expenses = Decimal(expenses)
+    revenue = _money(revenue)
+    expenses = _money(expenses)
     profit = revenue - expenses
     profit_margin = float(profit / revenue * 100) if revenue > ZERO else None
 
@@ -62,7 +70,7 @@ def get_monthly_trend(db: Session, business_id: uuid.UUID, start: date, end: dat
         .order_by(month_key)
     )
     return [
-        TrendPoint(period=row.period, revenue=Decimal(row.revenue), expenses=Decimal(row.expenses))
+        TrendPoint(period=row.period, revenue=_money(row.revenue), expenses=_money(row.expenses))
         for row in db.execute(stmt)
     ]
 
@@ -74,7 +82,7 @@ def get_expense_breakdown(db: Session, business_id: uuid.UUID, start: date, end:
         Transaction.transaction_date >= start,
         Transaction.transaction_date <= end,
     )
-    total = Decimal(db.scalar(total_stmt) or 0)
+    total = _money(db.scalar(total_stmt) or 0)
 
     category_name = func.coalesce(Category.name, "Uncategorized")
     stmt = (
@@ -92,7 +100,7 @@ def get_expense_breakdown(db: Session, business_id: uuid.UUID, start: date, end:
 
     items = []
     for row in db.execute(stmt):
-        row_total = Decimal(row.total)
+        row_total = _money(row.total)
         percentage = float(row_total / total * 100) if total > ZERO else 0.0
         items.append(
             CategoryBreakdownItem(

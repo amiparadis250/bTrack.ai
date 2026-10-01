@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -27,6 +28,13 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
 
 
+def _serializable_validation_errors(errors: list[dict]) -> list[dict]:
+    # "ctx" can hold the raw exception a validator raised (e.g. ValueError), which
+    # isn't JSON-serializable -- the human-readable message already lives in "msg".
+    cleaned = [{k: v for k, v in error.items() if k != "ctx"} for error in errors]
+    return jsonable_encoder(cleaned)
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     return JSONResponse(
@@ -36,7 +44,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "error": {
                 "code": "validation_error",
                 "message": "Some fields are invalid.",
-                "details": exc.errors(),
+                "details": _serializable_validation_errors(exc.errors()),
             },
         },
     )
