@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NAV_GROUP_ICONS, NAV_ICONS, NAV_ICON_FALLBACK } from "./nav-icons";
@@ -40,7 +40,6 @@ export function SidebarNav({
   routes: Record<string, string>;
   onLogout: () => void;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
   // Accordion: at most one group open at a time. Until the user manually
   // toggles one, the group containing the current route auto-expands.
@@ -169,14 +168,6 @@ export function SidebarNav({
       <div className="border-t border-white/10 p-screen-h">
         <p className="text-body-sm font-semibold text-on-overlay-dark">{roleLabel}</p>
         <div className="mt-2 flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 border-white/20 bg-transparent text-on-overlay-dark hover:bg-white/10"
-            onClick={() => router.push("/login")}
-          >
-            Switch Role
-          </Button>
           <Button
             variant="outline"
             size="sm"

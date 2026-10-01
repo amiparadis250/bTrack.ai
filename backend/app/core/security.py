@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
-from jose import JWTError, jwt
+import jwt
 from passlib.context import CryptContext
 
 from app.core.config import get_settings
@@ -47,7 +47,7 @@ def create_refresh_token(user_id: uuid.UUID) -> str:
 def decode_token(token: str, expected_type: TokenType) -> uuid.UUID | None:
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.jwt_algorithm])
-    except JWTError:
+    except jwt.PyJWTError:
         return None
     if payload.get("type") != expected_type:
         return None
