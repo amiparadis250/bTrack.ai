@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth-cookies";
 
-const BACKEND_URL = process.env.BACKEND_API_URL ?? "http://localhost:8000/api/v1";
+const BACKEND_URL = process.env.BACKEND_API_URL ?? "https://b-track-ai-uh3p-seven.vercel.app/api/v1";
 
 export function backendFetch(path: string, init?: RequestInit, accessToken?: string) {
   return fetch(`${BACKEND_URL}${path}`, {

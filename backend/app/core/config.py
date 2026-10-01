@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,https://b-track-ai.vercel.app"
     gemini_api_key: str | None = None
 
     @property
