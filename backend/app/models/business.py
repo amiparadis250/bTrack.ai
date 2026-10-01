@@ -36,3 +36,6 @@ class Business(Base):
     )
     insights: Mapped[list["AiInsight"]] = relationship(back_populates="business", cascade="all, delete-orphan")
     reports: Mapped[list["Report"]] = relationship(back_populates="business", cascade="all, delete-orphan")
+    uploaded_files: Mapped[list["UploadedFile"]] = relationship(
+        back_populates="business", cascade="all, delete-orphan"
+    )

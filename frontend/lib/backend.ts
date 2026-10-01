@@ -21,6 +21,17 @@ export async function authedBackendFetch(path: string, init?: RequestInit) {
   return backendFetch(path, init, accessToken);
 }
 
+/** Like authedBackendFetch, but for multipart/form-data -- never sets a JSON Content-Type so fetch can set its own boundary. */
+export async function authedBackendFormFetch(path: string, formData: FormData) {
+  const accessToken = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
+  return fetch(`${BACKEND_URL}${path}`, {
+    method: "POST",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    body: formData,
+    cache: "no-store",
+  });
+}
+
 export interface BackendErrorBody {
   success: false;
   error: { code: string; message: string; details?: unknown };
