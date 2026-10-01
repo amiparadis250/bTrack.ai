@@ -64,7 +64,11 @@ export function BusinessForm({ business }: { business: Business }) {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="business_type">Business Type</Label>
-          <Select value={businessType} onValueChange={(value) => setBusinessType(value as BusinessType)}>
+          <Select
+            items={BUSINESS_TYPE_LABELS}
+            value={businessType}
+            onValueChange={(value) => setBusinessType(value as BusinessType)}
+          >
             <SelectTrigger id="business_type" className="w-full">
               <SelectValue />
             </SelectTrigger>

@@ -37,6 +37,7 @@ export function TransactionFilters({ categories }: { categories: Category[] }) {
       </form>
 
       <Select
+        items={{ all: "All categories", ...Object.fromEntries(categories.map((c) => [c.id, c.name])) }}
         value={searchParams.get("category_id") ?? "all"}
         onValueChange={(value) => updateParam("category_id", value && value !== "all" ? value : "")}
       >

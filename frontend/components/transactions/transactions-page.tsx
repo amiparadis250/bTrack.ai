@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Plus, UploadCloud } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AddTransactionDialog } from "@/components/transactions/add-transaction-dialog";
 import { TransactionFilters } from "@/components/transactions/transaction-filters";
 import { TransactionTable } from "@/components/transactions/transaction-table";
 import { getActiveBusinessId } from "@/lib/active-business";
@@ -50,10 +51,7 @@ export async function TransactionsPage({
               Import
             </Link>
           ) : null}
-          <Link href={`/dashboard/transactions/new?type=${type ?? "expense"}`} className={buttonVariants()}>
-            <Plus className="size-4" />
-            Add Transaction
-          </Link>
+          <AddTransactionDialog categories={categories} defaultType={type} />
         </div>
       </div>
 

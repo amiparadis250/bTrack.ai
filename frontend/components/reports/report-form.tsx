@@ -58,7 +58,7 @@ export function ReportForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <Label htmlFor="report_type">Report Type</Label>
-        <Select value={reportType} onValueChange={(value) => setReportType(value as ReportType)}>
+        <Select items={REPORT_TYPE_LABELS} value={reportType} onValueChange={(value) => setReportType(value as ReportType)}>
           <SelectTrigger id="report_type" className="w-full">
             <SelectValue />
           </SelectTrigger>

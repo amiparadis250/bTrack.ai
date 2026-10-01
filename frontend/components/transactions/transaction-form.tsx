@@ -25,10 +25,15 @@ export function TransactionForm({
   categories,
   defaultType = "expense",
   returnTo,
+  onSuccess,
+  onCancel,
 }: {
   categories: Category[];
   defaultType?: TransactionType;
-  returnTo: string;
+  /** Used when no onSuccess/onCancel is given -- i.e. the standalone page, not the popup. */
+  returnTo?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const router = useRouter();
   const [type, setType] = useState<TransactionType>(defaultType);
@@ -75,7 +80,11 @@ export function TransactionForm({
         return;
       }
 
-      router.push(returnTo);
+      if (onSuccess) {
+        onSuccess();
+      } else if (returnTo) {
+        router.push(returnTo);
+      }
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -90,6 +99,7 @@ export function TransactionForm({
         <div className="flex flex-col gap-2">
           <Label htmlFor="type">Transaction Type</Label>
           <Select
+            items={TRANSACTION_TYPE_LABELS}
             value={type}
             onValueChange={(value) => {
               setType(value as TransactionType);
@@ -139,7 +149,11 @@ export function TransactionForm({
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="category">Category</Label>
-          <Select value={categoryId} onValueChange={(value) => setCategoryId(value ?? "")}>
+          <Select
+            items={Object.fromEntries(relevantCategories.map((c) => [c.id, c.name]))}
+            value={categoryId}
+            onValueChange={(value) => setCategoryId(value ?? "")}
+          >
             <SelectTrigger id="category" className="w-full">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
@@ -162,7 +176,11 @@ export function TransactionForm({
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="payment_method">Payment Method</Label>
-          <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
+          <Select
+            items={PAYMENT_METHOD_LABELS}
+            value={paymentMethod}
+            onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}
+          >
             <SelectTrigger id="payment_method" className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -188,7 +206,7 @@ export function TransactionForm({
       </div>
 
       <div className="flex justify-end gap-3 pt-2">
-        <Button type="button" variant="outline" onClick={() => router.push(returnTo)}>
+        <Button type="button" variant="outline" onClick={onCancel ?? (() => returnTo && router.push(returnTo))}>
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>

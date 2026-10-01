@@ -72,7 +72,11 @@ export default function OnboardingPage() {
             <Label htmlFor="business_type" className="text-body-sm">
               Business Type
             </Label>
-            <Select value={businessType} onValueChange={(value) => setBusinessType(value as BusinessType)}>
+            <Select
+              items={BUSINESS_TYPE_LABELS}
+              value={businessType}
+              onValueChange={(value) => setBusinessType(value as BusinessType)}
+            >
               <SelectTrigger id="business_type" className="w-full">
                 <SelectValue />
               </SelectTrigger>

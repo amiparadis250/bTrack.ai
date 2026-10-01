@@ -73,7 +73,11 @@ export function ReviewTable({
         const current = categoryOverrides[row.row_number] ?? row.category_id ?? row.suggested_category_id ?? "";
         return (
           <div className="flex flex-col gap-1">
-            <Select value={current} onValueChange={(value) => onCategoryChange(row.row_number, value ?? "")}>
+            <Select
+              items={Object.fromEntries(options.map((c) => [c.id, c.name]))}
+              value={current}
+              onValueChange={(value) => onCategoryChange(row.row_number, value ?? "")}
+            >
               <SelectTrigger className="h-8 w-40">
                 <SelectValue placeholder="Uncategorized" />
               </SelectTrigger>
