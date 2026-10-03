@@ -156,31 +156,6 @@ POST   /businesses/{id}/reports
 GET    /businesses/{id}/reports/{report_id}/download
 ```
 
-Every business-scoped route verifies the authenticated user owns that
-business server-side; a mismatched `business_id` returns `404`, never data
-from another account.
 
-## Development notes
 
-- Money is stored and computed as `Numeric`/`Decimal` end to end -- the API
-  serializes amounts as strings (e.g. `"15000.00"`) to avoid floating-point
-  drift; the frontend only formats them for display.
-- JWT access/refresh tokens are kept in httpOnly cookies set by Next.js route
-  handlers (`frontend/app/api/auth/*`) -- the browser never sees the raw tokens.
-- The AI Assistant uses Gemini function calling (`backend/app/services/ai_service.py`):
-  Gemini never computes a financial figure itself -- it only calls real backend
-  functions (`get_revenue`, `get_expenses`, `get_profit`, etc.) that query the
-  database, then explains the real result. Model is pinned to `gemini-3.1-flash-lite`;
-  if a different Gemini model name 404s or 503s for your key, check
-  `client.models.list()` for currently available names and update `MODEL_NAME`.
-- AI Insights (`insights_service.py`) are deterministic, not LLM-generated --
-  period-over-period deltas (revenue, expense categories, concentration, margin)
-  computed in SQL and phrased with templates. This keeps them instant, free, and
-  impossible to hallucinate; regenerating is idempotent (upserts by business +
-  type + period) so revisiting the page doesn't create duplicates.
-- Reports (`report_service.py`) store only metadata (type/format/period) in the
-  `reports` table; the PDF (reportlab) or Excel (openpyxl) file itself is
-  regenerated fresh from current data on every download rather than stored as a
-  blob in Postgres.
-- Transaction categorization and historical-data import are the remaining
-  unbuilt pieces; see the roadmap in the product spec for the phased plan.
+
