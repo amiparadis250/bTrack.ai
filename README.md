@@ -6,9 +6,7 @@ bTrack.ai is an AI-ready financial management platform for small and medium
 businesses in Rwanda. This repo contains the Next.js frontend and the FastAPI
 backend for: authentication, business onboarding, transaction tracking, a
 dashboard with real financial KPIs, analytics, a Gemini-backed AI Assistant,
-proactive AI Insights, and PDF/Excel report generation. Historical data import
-is the one piece still stubbed in the navigation with an honest "coming soon"
-state -- it's not built yet, and nothing on screen is faked in the meantime.
+proactive AI Insights, and PDF/Excel report generation.
 
 ## Architecture
 
